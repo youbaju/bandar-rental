@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل الدخول — إيجارات بندر</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M4 21V9l8-6 8 6v12" stroke-linejoin="round"/>
+        <path d="M9 21v-7h6v7" stroke-linejoin="round"/>
+        <path d="M9 12h.01M15 12h.01M9 8.5h.01M15 8.5h.01"/>
+      </svg>
+    </div>
+    <h1>عمارة بندر</h1>
+    <p class="sub">نظام إدارة الإيجارات — سجّل الدخول للمتابعة</p>
+
+    <div class="login-error" id="loginError">بيانات الدخول غير صحيحة</div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="email">البريد الإلكتروني</label>
+        <input type="email" id="email" required autocomplete="username" dir="ltr">
+      </div>
+      <div class="field">
+        <label for="password">كلمة المرور</label>
+        <input type="password" id="password" required autocomplete="current-password" dir="ltr">
+      </div>
+      <button type="submit" class="btn btn-primary" id="loginBtn">دخول</button>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, signInWithEmailAndPassword, onAuthStateChanged } from "./js/firebase-config.js";
+
+  const form = document.getElementById('loginForm');
+  const errBox = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+
+  // لو المستخدم مسجل دخول بالفعل، وديه للتطبيق مباشرة
+  onAuthStateChanged(auth, (user) => {
+    if (user) window.location.href = 'app.html';
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errBox.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = 'جاري التحقق...';
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      window.location.href = 'app.html';
+    } catch (err) {
+      errBox.textContent = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+      errBox.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'دخول';
+    }
+  });
+</script>
+
+</body>
+</html>

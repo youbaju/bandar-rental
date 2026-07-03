@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استيراد البيانات — إيجارات بندر</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="login-card" style="max-width:460px;">
+    <h1>استيراد بيانات عمارة بندر</h1>
+    <p class="sub">نقل بيانات الشقق والمستأجرين والإيجارات من ملف الأكسس القديم إلى قاعدة البيانات الجديدة. هذه العملية تُنفَّذ مرة واحدة فقط.</p>
+
+    <div id="status" style="margin-bottom:18px; font-size:14px; color:var(--text-muted);">
+      جاري التحقق من حالة قاعدة البيانات...
+    </div>
+
+    <button class="btn btn-clay" id="importBtn" style="width:100%;" disabled>ابدأ الاستيراد</button>
+    <a href="app.html" class="btn btn-ghost" style="width:100%; margin-top:10px; display:none; text-align:center;" id="goAppBtn">الذهاب إلى التطبيق</a>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, db, onAuthStateChanged, collection, addDoc, getDocs } from "./js/firebase-config.js";
+
+  const statusBox = document.getElementById("status");
+  const importBtn = document.getElementById("importBtn");
+  const goAppBtn = document.getElementById("goAppBtn");
+
+  const DATA = {"flats": [{"flatFloor": "الاول", "flatNumber": 1, "monthlRent": 2084.0, "rented": true, "meterNumber": ""}, {"flatFloor": "الاول", "flatNumber": 2, "monthlRent": 2084.0, "rented": false, "meterNumber": ""}, {"flatFloor": "الثاني", "flatNumber": 3, "monthlRent": 2250.0, "rented": true, "meterNumber": ""}, {"flatFloor": "الثاني", "flatNumber": 4, "monthlRent": 2250.0, "rented": true, "meterNumber": ""}, {"flatFloor": "الثالث", "flatNumber": 5, "monthlRent": 1916.66, "rented": true, "meterNumber": ""}, {"flatFloor": "الثالث", "flatNumber": 6, "monthlRent": 1916.66, "rented": true, "meterNumber": ""}, {"flatFloor": "الرابع", "flatNumber": 7, "monthlRent": 1416.66, "rented": true, "meterNumber": ""}, {"flatFloor": "الرابع", "flatNumber": 8, "monthlRent": 1416.66, "rented": false, "meterNumber": ""}], "renters": [{"renterId": "1114847377", "renterName": "عبدالله فهد عبدالله الخليل", "nationality": "سعودي", "mobile": "0503344129", "workAddress": ""}, {"renterId": "2007110998", "renterName": "صديق اسيك", "nationality": "تركي", "mobile": "0595985572", "workAddress": ""}, {"renterId": "2139302109", "renterName": "ناجي ناصر عبده", "nationality": "يمني", "mobile": "0565599188", "workAddress": ""}, {"renterId": "2151472939", "renterName": "فراس حسن دبس", "nationality": "سوري", "mobile": "0560503333", "workAddress": ""}, {"renterId": "2301624850", "renterName": "محمد علي مصلح الدعوس", "nationality": "يمني", "mobile": "0537481462", "workAddress": ""}], "rents": [{"renterId": "1114847377", "renterName": "عبدالله فهد عبدالله الخليل", "flatNumber": 1, "dateOfPay": "2024-06-15", "dateOfRent": "2024-06-01", "amount": 2085.0, "months": 1, "endOfRent": "2024-06-30", "bank": "الأهلي", "paymentWay": "حواله", "reason": "ايجار شقه رقم 1 للفتره من 2024/06/01 حتى تاريخ 2024/06/30"}, {"renterId": "2139302109", "renterName": "ناجي ناصر عبده", "flatNumber": 7, "dateOfPay": "2022-08-06", "dateOfRent": "2022-08-01", "amount": 8500.0, "months": 6, "endOfRent": "2023-01-31", "bank": "الأهلي", "paymentWay": "حواله", "reason": "ايجار شقه رقم 7 للفتره من 2022/08/01 حتى تاريخ 2023/01/31"}, {"renterId": "2007110998", "renterName": "صديق اسيك", "flatNumber": 5, "dateOfPay": "2022-08-22", "dateOfRent": "2022-07-01", "amount": 11500.0, "months": 6, "endOfRent": "2022-12-31", "bank": "الرياض", "paymentWay": "حواله", "reason": "ايجار شقه رقم 5 للفتره من 2022/07/01 حتى تاريخ 2022/12/31"}, {"renterId": "2151472939", "renterName": "فراس حسن دبس", "flatNumber": 4, "dateOfPay": null, "dateOfRent": "2023-01-01", "amount": 13500.0, "months": 6, "endOfRent": "2023-06-30", "bank": "", "paymentWay": "نقداً", "reason": "ايجار شقه رقم 4 للفتره من 2023/01/01 حتى تاريخ 2023/06/30"}, {"renterId": "2007110998", "renterName": "صديق اسيك", "flatNumber": 5, "dateOfPay": "2023-05-25", "dateOfRent": "2023-01-01", "amount": 13000.0, "months": 6, "endOfRent": "2023-06-30", "bank": "الرياض", "paymentWay": "حواله", "reason": "دفعة من ايجار شقه رقم 5 للفتره من 2023/01/01 حتى تاريخ 2023/06/30"}, {"renterId": "2139302109", "renterName": "ناجي ناصر عبده", "flatNumber": 7, "dateOfPay": "2023-07-13", "dateOfRent": "2023-02-01", "amount": 8500.0, "months": 6, "endOfRent": "2023-07-31", "bank": "الأهلي", "paymentWay": "حواله", "reason": "ايجار شقه رقم 7 للفتره من 2023/02/01 حتى تاريخ 2023/07/31"}, {"renterId": "2301624850", "renterName": "محمد علي مصلح الدعوس", "flatNumber": 8, "dateOfPay": null, "dateOfRent": "2022-08-01", "amount": 8500.0, "months": 6, "endOfRent": "2023-01-31", "bank": "", "paymentWay": "نقداً", "reason": "ايجار شقه رقم 8 للفتره من 2022/08/01 حتى تاريخ 2023/01/31"}, {"renterId": "1114847377", "renterName": "عبدالله فهد عبدالله الخليل", "flatNumber": 1, "dateOfPay": "2023-12-23", "dateOfRent": "2023-12-01", "amount": 2084.0, "months": 1, "endOfRent": "2023-12-31", "bank": "البنك الأهلي", "paymentWay": "حواله", "reason": "ايجار شقه رقم 1 للفتره من 2023/12/01 حتى تاريخ 2023/12/31"}, {"renterId": "1114847377", "renterName": "عبدالله فهد عبدالله الخليل", "flatNumber": 1, "dateOfPay": "2024-01-04", "dateOfRent": "2024-01-01", "amount": 2084.0, "months": 1, "endOfRent": "2024-01-31", "bank": "الأهلي", "paymentWay": "حواله", "reason": "ايجار شقه رقم 1 للفتره من 2024/01/01 حتى تاريخ 2024/01/31"}, {"renterId": "1114847377", "renterName": "عبدالله فهد عبدالله الخليل", "flatNumber": 1, "dateOfPay": "2024-01-26", "dateOfRent": "2024-02-01", "amount": 2085.0, "months": 1, "endOfRent": "2024-02-29", "bank": "الأهلي", "paymentWay": "حواله", "reason": "ايجار شقه رقم 1 للفتره من 2024/02/01 حتى تاريخ 2024/02/29"}, {"renterId": "2139302109", "renterName": "ناجي ناصر عبده", "flatNumber": 7, "dateOfPay": "2023-12-29", "dateOfRent": "2023-08-01", "amount": 8500.0, "months": 6, "endOfRent": "2024-01-31", "bank": "الأهلي", "paymentWay": "حواله", "reason": "ايجار شقه رقم 7 للفتره من 2023/08/01 حتى تاريخ 2024/01/31"}, {"renterId": "2151472939", "renterName": "فراس حسن دبس", "flatNumber": 4, "dateOfPay": "2024-01-23", "dateOfRent": "2023-07-01", "amount": 13500.0, "months": 6, "endOfRent": "2023-12-31", "bank": "الأهلي", "paymentWay": "حواله", "reason": "ايجار شقه رقم 4 للفتره من 2023/07/01 حتى تاريخ 2023/12/31"}, {"renterId": "2007110998", "renterName": "صديق اسيك", "flatNumber": 3, "dateOfPay": "2024-01-29", "dateOfRent": "2023-07-01", "amount": 14000.0, "months": 6, "endOfRent": "2023-12-31", "bank": "تي سي زراعات بنكساي", "paymentWay": "حواله", "reason": " ايجار شقه رقم 3 للفتره من 2023/07/01 حتى تاريخ 2023/12/31"}, {"renterId": "1114847377", "renterName": "عبدالله فهد عبدالله الخليل", "flatNumber": 1, "dateOfPay": "2024-03-07", "dateOfRent": "2024-03-01", "amount": 2000.0, "months": 1, "endOfRent": "2024-03-31", "bank": "البنك الأهلي", "paymentWay": "حواله", "reason": "دفعه من ايجار شقه رقم 1 للفتره من 2024/03/01 حتى تاريخ 2024/03/31"}, {"renterId": "1114847377", "renterName": "عبدالله فهد عبدالله الخليل", "flatNumber": 1, "dateOfPay": "2024-04-14", "dateOfRent": "2024-04-01", "amount": 2166.0, "months": 1, "endOfRent": "2024-04-30", "bank": "الأهلي", "paymentWay": "حواله", "reason": "ايجار شقه رقم 1 للفتره من 2024/04/01 حتى تاريخ 2024/04/30 ومتبقي شهر من ايجار شهر مارس 2024م"}, {"renterId": "1114847377", "renterName": "عبدالله فهد عبدالله الخليل", "flatNumber": 1, "dateOfPay": "2024-05-14", "dateOfRent": "2024-05-01", "amount": 2084.0, "months": 1, "endOfRent": "2024-05-31", "bank": "الأهلي", "paymentWay": "حواله", "reason": "ايجار شقه رقم 1 للفتره من 2024/05/01 حتى تاريخ 2024/05/31"}]};
+
+  let currentUser = null;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "index.html"; return; }
+    currentUser = user;
+    await checkStatus();
+  });
+
+  async function checkStatus() {
+    const snap = await getDocs(collection(db, "flats"));
+    if (!snap.empty) {
+      statusBox.textContent = `قاعدة البيانات تحتوي بالفعل على ${snap.size} شقة مسجلة. استيراد البيانات مرة أخرى سينشئ تكراراً. تأكد أولاً إن لم تكن قد استوردت البيانات من قبل.`;
+      importBtn.textContent = "استيراد مرة أخرى على أي حال";
+    } else {
+      statusBox.textContent = `جاهز للاستيراد: ${DATA.flats.length} شقة، ${DATA.renters.length} مستأجرين، ${DATA.rents.length} سجل إيجار.`;
+    }
+    importBtn.disabled = false;
+  }
+
+  importBtn.addEventListener("click", async () => {
+    importBtn.disabled = true;
+    importBtn.textContent = "جاري الاستيراد...";
+    try {
+      for (const f of DATA.flats) await addDoc(collection(db, "flats"), f);
+      for (const r of DATA.renters) await addDoc(collection(db, "renters"), r);
+      for (const r of DATA.rents) await addDoc(collection(db, "rents"), r);
+      statusBox.textContent = "تم استيراد جميع البيانات بنجاح ✅";
+      importBtn.style.display = "none";
+      goAppBtn.style.display = "block";
+    } catch (err) {
+      statusBox.textContent = "حدث خطأ أثناء الاستيراد: " + err.message;
+      importBtn.disabled = false;
+      importBtn.textContent = "إعادة المحاولة";
+    }
+  });
+</script>
+
+</body>
+</html>
