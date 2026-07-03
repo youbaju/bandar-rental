@@ -308,9 +308,10 @@ function renderRentsTable(filterText = "") {
       <td>${r.months ?? "—"}</td>
       <td>${formatDate(r.endOfRent)}</td>
       <td>${r.paymentWay || "—"}</td>
+      <td>${r.bank || "—"}</td>
+      <td class="remark-cell" title="${escapeAttr(r.remark || "")}">${r.remark ? truncate(r.remark, 28) : "—"}</td>
       <td>
         <div class="row-actions">
-          ${r.remark ? `<span class="icon-btn" title="${escapeAttr(r.remark)}" style="cursor:help;">${noteIcon()}</span>` : ""}
           <button class="icon-btn" data-edit-rent="${r.id}" title="تعديل">${editIcon()}</button>
           <button class="icon-btn danger" data-del-rent="${r.id}" title="حذف">${trashIcon()}</button>
         </div>
@@ -341,12 +342,18 @@ function setupModals() {
   document.getElementById("addRenterBtn").addEventListener("click", () => openRenterModal(null));
   document.getElementById("addRentBtn").addEventListener("click", () => openRentModal(null));
 
+  document.getElementById("rentPaymentWay").addEventListener("change", updateBankFieldVisibility);
+
   document.querySelectorAll("[data-close-modal]").forEach(btn => {
     btn.addEventListener("click", () => closeModal(btn.dataset.closeModal));
   });
   document.querySelectorAll(".modal-overlay").forEach(ov => {
     ov.addEventListener("click", (e) => { if (e.target === ov) closeModal(ov.id); });
   });
+}
+function updateBankFieldVisibility() {
+  const isTransfer = document.getElementById("rentPaymentWay").value === "حواله";
+  document.getElementById("rentBankField").style.display = isTransfer ? "block" : "none";
 }
 function openModal(id) { document.getElementById(id).classList.add("show"); }
 function closeModal(id) { document.getElementById(id).classList.remove("show"); }
@@ -409,6 +416,7 @@ function openRentModal(id) {
   } else {
     document.getElementById("rentDatePay").value = toDateInput(new Date());
   }
+  updateBankFieldVisibility();
   openModal("rentModal");
 }
 
@@ -549,6 +557,10 @@ function trashIcon() {
 }
 function noteIcon() {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v12H8l-4 4V4z"/></svg>`;
+}
+function truncate(s, n) {
+  s = String(s);
+  return s.length > n ? s.slice(0, n) + "…" : s;
 }
 function escapeAttr(s) {
   return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");

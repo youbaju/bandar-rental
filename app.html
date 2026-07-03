@@ -165,7 +165,7 @@
         <div style="overflow-x:auto;">
         <table>
           <thead><tr>
-            <th>تاريخ الدفع</th><th>المستأجر</th><th>الشقة</th><th>المبلغ</th><th>المدة (شهور)</th><th>تاريخ الانتهاء</th><th>طريقة الدفع</th><th></th>
+            <th>تاريخ الدفع</th><th>المستأجر</th><th>الشقة</th><th>المبلغ</th><th>المدة (شهور)</th><th>تاريخ الانتهاء</th><th>طريقة الدفع</th><th>البنك</th><th>ملاحظات</th><th></th>
           </tr></thead>
           <tbody id="rentsTableBody"></tbody>
         </table>
@@ -291,11 +291,10 @@
           <select id="rentPaymentWay">
             <option value="حواله">حوالة</option>
             <option value="نقداً">نقداً</option>
-            <option value="شيك">شيك</option>
           </select>
         </div>
-        <div class="field">
-          <label>البنك (إن وجد)</label>
+        <div class="field" id="rentBankField">
+          <label>اسم البنك</label>
           <input type="text" id="rentBank">
         </div>
       </div>
