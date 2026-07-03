@@ -309,7 +309,7 @@ function renderRentsTable(filterText = "") {
       <td>${formatDate(r.endOfRent)}</td>
       <td>${r.paymentWay || "—"}</td>
       <td>${r.bank || "—"}</td>
-      <td class="remark-cell" title="${escapeAttr(r.remark || "")}">${r.remark ? truncate(r.remark, 28) : "—"}</td>
+      <td class="remark-cell" ${r.remark ? `data-remark="${escapeAttr(r.remark)}" style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted;"` : ""}>${r.remark ? truncate(r.remark, 22) : "—"}</td>
       <td>
         <div class="row-actions">
           <button class="icon-btn" data-edit-rent="${r.id}" title="تعديل">${editIcon()}</button>
@@ -317,6 +317,10 @@ function renderRentsTable(filterText = "") {
         </div>
       </td>
     </tr>`).join("");
+
+  body.querySelectorAll("[data-remark]").forEach(cell => {
+    cell.addEventListener("click", () => alert(cell.dataset.remark));
+  });
 
   body.querySelectorAll("[data-edit-rent]").forEach(b => b.addEventListener("click", () => openRentModal(b.dataset.editRent)));
   body.querySelectorAll("[data-del-rent]").forEach(b => b.addEventListener("click", () => deleteRent(b.dataset.delRent)));
