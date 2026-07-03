@@ -347,6 +347,7 @@ function setupModals() {
   document.getElementById("addRentBtn").addEventListener("click", () => openRentModal(null));
 
   document.getElementById("rentPaymentWay").addEventListener("change", updateBankFieldVisibility);
+  document.getElementById("rentBank").addEventListener("change", updateBankOtherVisibility);
 
   document.querySelectorAll("[data-close-modal]").forEach(btn => {
     btn.addEventListener("click", () => closeModal(btn.dataset.closeModal));
@@ -358,6 +359,32 @@ function setupModals() {
 function updateBankFieldVisibility() {
   const isTransfer = document.getElementById("rentPaymentWay").value === "حواله";
   document.getElementById("rentBankField").style.display = isTransfer ? "block" : "none";
+}
+function updateBankOtherVisibility() {
+  const other = document.getElementById("rentBankOther");
+  other.style.display = document.getElementById("rentBank").value === "__other__" ? "block" : "none";
+}
+function getSelectedBank() {
+  const sel = document.getElementById("rentBank").value;
+  return sel === "__other__" ? document.getElementById("rentBankOther").value.trim() : sel;
+}
+function setSelectedBank(bankName) {
+  const select = document.getElementById("rentBank");
+  const other = document.getElementById("rentBankOther");
+  const knownOptions = [...select.options].map(o => o.value);
+  if (bankName && knownOptions.includes(bankName)) {
+    select.value = bankName;
+    other.style.display = "none";
+    other.value = "";
+  } else if (bankName) {
+    select.value = "__other__";
+    other.style.display = "block";
+    other.value = bankName;
+  } else {
+    select.value = "البنك الأهلي السعودي";
+    other.style.display = "none";
+    other.value = "";
+  }
 }
 function openModal(id) { document.getElementById(id).classList.add("show"); }
 function closeModal(id) { document.getElementById(id).classList.remove("show"); }
@@ -414,11 +441,12 @@ function openRentModal(id) {
     document.getElementById("rentDatePay").value = toDateInput(r.dateOfPay);
     document.getElementById("rentAmount").value = r.amount ?? "";
     document.getElementById("rentPaymentWay").value = r.paymentWay || "حواله";
-    document.getElementById("rentBank").value = r.bank || "";
+    setSelectedBank(r.bank || "");
     document.getElementById("rentReason").value = r.reason || "";
     document.getElementById("rentRemark").value = r.remark || "";
   } else {
     document.getElementById("rentDatePay").value = toDateInput(new Date());
+    setSelectedBank("");
   }
   updateBankFieldVisibility();
   openModal("rentModal");
@@ -485,7 +513,7 @@ function setupForms() {
       months,
       endOfRent: endDate,
       paymentWay: document.getElementById("rentPaymentWay").value,
-      bank: document.getElementById("rentBank").value.trim(),
+      bank: getSelectedBank(),
       reason: document.getElementById("rentReason").value.trim(),
       remark: document.getElementById("rentRemark").value.trim(),
     };
