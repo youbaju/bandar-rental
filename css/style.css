@@ -247,6 +247,7 @@ a { color: inherit; }
   direction: ltr;
   text-align: right;
 }
+#logoutBtnMobile { display: none; }
 
 .sidebar-foot {
   border-top: 1px solid rgba(246,241,231,0.12);
@@ -530,6 +531,7 @@ tbody tr:hover { background: var(--sand); }
   .nav.open { transform: translateY(0); }
   .sidebar-foot { display: none; }
   .nav-user-info { display: block; }
+  #logoutBtnMobile { display: flex; }
   .menu-toggle {
     display: flex; margin-inline-start: auto;
     background: none; border: none; color: var(--sand); cursor: pointer;
