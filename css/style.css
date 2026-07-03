@@ -237,6 +237,16 @@ a { color: inherit; }
   min-width: 18px;
   text-align: center;
 }
+.nav-user-info {
+  display: none;
+  color: rgba(246,241,231,0.5);
+  font-size: 12.5px;
+  padding: 14px 12px 6px;
+  border-top: 1px solid rgba(246,241,231,0.12);
+  margin-top: 10px;
+  direction: ltr;
+  text-align: right;
+}
 
 .sidebar-foot {
   border-top: 1px solid rgba(246,241,231,0.12);
@@ -519,6 +529,7 @@ tbody tr:hover { background: var(--sand); }
   }
   .nav.open { transform: translateY(0); }
   .sidebar-foot { display: none; }
+  .nav-user-info { display: block; }
   .menu-toggle {
     display: flex; margin-inline-start: auto;
     background: none; border: none; color: var(--sand); cursor: pointer;

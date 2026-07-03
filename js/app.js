@@ -9,11 +9,17 @@ onAuthStateChanged(auth, (user) => {
     window.location.href = "index.html";
   } else {
     document.getElementById("userEmail").textContent = user.email;
+    const navInfo = document.getElementById("navUserInfo");
+    if (navInfo) navInfo.textContent = user.email;
     init();
   }
 });
 
 document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+});
+document.getElementById("logoutBtnMobile")?.addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "index.html";
 });
