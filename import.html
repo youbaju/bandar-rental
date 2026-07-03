@@ -95,21 +95,35 @@
   importBtn.addEventListener("click", async () => {
     importBtn.disabled = true;
     importBtn.textContent = "جاري المزامنة...";
-    try {
-      for (const f of plan.newFlats) await addDoc(collection(db, "flats"), f);
-      for (const f of plan.updateFlats) await updateDoc(doc(db, "flats", f.id), f.data);
-      for (const r of plan.newRenters) await addDoc(collection(db, "renters"), r);
-      for (const r of plan.updateRenters) await updateDoc(doc(db, "renters", r.id), r.data);
-      for (const r of plan.newRents) await addDoc(collection(db, "rents"), r);
+    let okCount = 0, skipCount = 0;
+    const tasks = [
+      ...plan.newFlats.map(f => () => addDoc(collection(db, "flats"), f)),
+      ...plan.updateFlats.map(f => () => updateDoc(doc(db, "flats", f.id), f.data)),
+      ...plan.newRenters.map(r => () => addDoc(collection(db, "renters"), r)),
+      ...plan.updateRenters.map(r => () => updateDoc(doc(db, "renters", r.id), r.data)),
+      ...plan.newRents.map(r => () => addDoc(collection(db, "rents"), r)),
+    ];
 
-      statusBox.textContent = "تمت المزامنة بنجاح ✅";
-      importBtn.style.display = "none";
-      goAppBtn.style.display = "block";
-    } catch (err) {
-      statusBox.textContent = "حدث خطأ أثناء المزامنة: " + err.message;
-      importBtn.disabled = false;
-      importBtn.textContent = "إعادة المحاولة";
+    for (const task of tasks) {
+      try {
+        await task();
+        okCount++;
+      } catch (err) {
+        // مستند اتضاف بالفعل من محاولة سابقة (مشكلة شبكة مؤقتة) - نتخطاه بأمان
+        if (String(err.message || "").includes("already exists")) {
+          skipCount++;
+        } else {
+          statusBox.textContent = `حدث خطأ أثناء المزامنة: ${err.message}`;
+          importBtn.disabled = false;
+          importBtn.textContent = "إعادة المحاولة";
+          return;
+        }
+      }
     }
+
+    statusBox.textContent = `تمت المزامنة بنجاح ✅ (${okCount} عملية جديدة${skipCount ? `، وتم تخطي ${skipCount} كانت مضافة بالفعل` : ""})`;
+    importBtn.style.display = "none";
+    goAppBtn.style.display = "block";
   });
 </script>
 
