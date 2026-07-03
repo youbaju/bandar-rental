@@ -301,6 +301,12 @@ function renderRentsTable(filterText = "") {
   empty.style.display = "none";
   body.innerHTML = filtered.map(r => `
     <tr>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" data-edit-rent="${r.id}" title="تعديل">${editIcon()}</button>
+          <button class="icon-btn danger" data-del-rent="${r.id}" title="حذف">${trashIcon()}</button>
+        </div>
+      </td>
       <td>${formatDate(r.dateOfPay)}</td>
       <td>${r.renterName || "—"}</td>
       <td>${r.flatNumber ?? "—"}</td>
@@ -310,12 +316,6 @@ function renderRentsTable(filterText = "") {
       <td>${r.paymentWay || "—"}</td>
       <td>${r.bank || "—"}</td>
       <td class="remark-cell" ${r.remark ? `data-remark="${escapeAttr(r.remark)}" style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted;"` : ""}>${r.remark ? truncate(r.remark, 22) : "—"}</td>
-      <td>
-        <div class="row-actions">
-          <button class="icon-btn" data-edit-rent="${r.id}" title="تعديل">${editIcon()}</button>
-          <button class="icon-btn danger" data-del-rent="${r.id}" title="حذف">${trashIcon()}</button>
-        </div>
-      </td>
     </tr>`).join("");
 
   body.querySelectorAll("[data-remark]").forEach(cell => {
@@ -336,8 +336,10 @@ function setupSearch() {
 function populateRentSelects() {
   const renterSel = document.getElementById("rentRenter");
   const flatSel = document.getElementById("rentFlat");
-  renterSel.innerHTML = rentersCache.map(r => `<option value="${r.id}">${r.renterName} — ${r.renterId}</option>`).join("");
-  flatSel.innerHTML = flatsCache.map(f => `<option value="${f.id}">شقة ${f.flatNumber} (${f.flatFloor || ""})</option>`).join("");
+  renterSel.innerHTML = `<option value="" disabled selected>اختر المستأجر...</option>` +
+    rentersCache.map(r => `<option value="${r.id}">${r.renterName} — ${r.renterId}</option>`).join("");
+  flatSel.innerHTML = `<option value="" disabled selected>اختر الشقة...</option>` +
+    flatsCache.map(f => `<option value="${f.id}">شقة ${f.flatNumber} (${f.flatFloor || ""})</option>`).join("");
 }
 
 /* ============ نوافذ الإضافة/التعديل ============ */
