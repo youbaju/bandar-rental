@@ -304,6 +304,7 @@ function renderRentsTable(filterText = "") {
       <td>${r.paymentWay || "—"}</td>
       <td>
         <div class="row-actions">
+          ${r.remark ? `<span class="icon-btn" title="${escapeAttr(r.remark)}" style="cursor:help;">${noteIcon()}</span>` : ""}
           <button class="icon-btn" data-edit-rent="${r.id}" title="تعديل">${editIcon()}</button>
           <button class="icon-btn danger" data-del-rent="${r.id}" title="حذف">${trashIcon()}</button>
         </div>
@@ -398,6 +399,7 @@ function openRentModal(id) {
     document.getElementById("rentPaymentWay").value = r.paymentWay || "حواله";
     document.getElementById("rentBank").value = r.bank || "";
     document.getElementById("rentReason").value = r.reason || "";
+    document.getElementById("rentRemark").value = r.remark || "";
   } else {
     document.getElementById("rentDatePay").value = toDateInput(new Date());
   }
@@ -467,6 +469,7 @@ function setupForms() {
       paymentWay: document.getElementById("rentPaymentWay").value,
       bank: document.getElementById("rentBank").value.trim(),
       reason: document.getElementById("rentReason").value.trim(),
+      remark: document.getElementById("rentRemark").value.trim(),
     };
     try {
       if (id) await updateDoc(doc(db, "rents", id), data);
@@ -537,4 +540,10 @@ function editIcon() {
 }
 function trashIcon() {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>`;
+}
+function noteIcon() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v12H8l-4 4V4z"/></svg>`;
+}
+function escapeAttr(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 }
