@@ -301,12 +301,6 @@ function renderRentsTable(filterText = "") {
   empty.style.display = "none";
   body.innerHTML = filtered.map(r => `
     <tr>
-      <td>
-        <div class="row-actions">
-          <button class="icon-btn" data-edit-rent="${r.id}" title="تعديل">${editIcon()}</button>
-          <button class="icon-btn danger" data-del-rent="${r.id}" title="حذف">${trashIcon()}</button>
-        </div>
-      </td>
       <td>${formatDate(r.dateOfPay)}</td>
       <td>${r.renterName || "—"}</td>
       <td>${r.flatNumber ?? "—"}</td>
@@ -316,10 +310,16 @@ function renderRentsTable(filterText = "") {
       <td>${r.paymentWay || "—"}</td>
       <td>${r.bank || "—"}</td>
       <td class="remark-cell" ${r.remark ? `data-remark="${escapeAttr(r.remark)}" style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted;"` : ""}>${r.remark ? truncate(r.remark, 22) : "—"}</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" data-edit-rent="${r.id}" title="تعديل">${editIcon()}</button>
+          <button class="icon-btn danger" data-del-rent="${r.id}" title="حذف">${trashIcon()}</button>
+        </div>
+      </td>
     </tr>`).join("");
 
   body.querySelectorAll("[data-remark]").forEach(cell => {
-    cell.addEventListener("click", () => alert(cell.dataset.remark));
+    cell.addEventListener("click", () => showRemarkModal(cell.dataset.remark));
   });
 
   body.querySelectorAll("[data-edit-rent]").forEach(b => b.addEventListener("click", () => openRentModal(b.dataset.editRent)));
@@ -383,13 +383,17 @@ function setSelectedBank(bankName) {
     other.style.display = "block";
     other.value = bankName;
   } else {
-    select.value = "البنك الأهلي السعودي";
+    select.value = "";
     other.style.display = "none";
     other.value = "";
   }
 }
 function openModal(id) { document.getElementById(id).classList.add("show"); }
 function closeModal(id) { document.getElementById(id).classList.remove("show"); }
+function showRemarkModal(text) {
+  document.getElementById("remarkModalText").textContent = text;
+  openModal("remarkModal");
+}
 
 function openFlatModal(id) {
   const form = document.getElementById("flatForm");
@@ -447,7 +451,6 @@ function openRentModal(id) {
     document.getElementById("rentReason").value = r.reason || "";
     document.getElementById("rentRemark").value = r.remark || "";
   } else {
-    document.getElementById("rentDatePay").value = toDateInput(new Date());
     setSelectedBank("");
   }
   updateBankFieldVisibility();

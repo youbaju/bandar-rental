@@ -415,14 +415,7 @@ a { color: inherit; }
   overflow: hidden;
 }
 table { width: 100%; border-collapse: collapse; }
-.table-rents th:first-child, .table-rents td:first-child {
-  position: sticky;
-  right: 0;
-  z-index: 5;
-  box-shadow: -6px 0 8px -6px rgba(0,0,0,0.15);
-}
-.table-rents tbody td:first-child { background: var(--surface); }
-.table-rents tbody tr:hover td:first-child { background: var(--sand); }
+.table-rents .col-narrow { width: 68px; white-space: normal; line-height: 1.3; }
 thead th {
   background: var(--sand-deep);
   color: var(--ink-soft);
@@ -549,4 +542,12 @@ tbody tr:hover { background: var(--sand); }
   .form-grid { grid-template-columns: 1fr; }
   .floor-row { flex-direction: column; align-items: stretch; }
   .floor-label { width: auto; text-align: right; }
+  .table-rents th:last-child, .table-rents td:last-child {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    box-shadow: 6px 0 8px -6px rgba(0,0,0,0.15);
+  }
+  .table-rents tbody td:last-child { background: var(--surface); }
+  .table-rents tbody tr:hover td:last-child { background: var(--sand); }
 }

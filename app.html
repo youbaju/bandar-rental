@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>إيجارات بندر</title>
-<link rel="stylesheet" href="css/style.css?v=4">
+<link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
 
@@ -165,7 +165,7 @@
         <div style="overflow-x:auto;">
         <table class="table-rents">
           <thead><tr>
-            <th></th><th>تاريخ الدفع</th><th>المستأجر</th><th>الشقة</th><th>المبلغ</th><th>المدة (شهور)</th><th>تاريخ الانتهاء</th><th>طريقة الدفع</th><th>البنك</th><th>ملاحظات</th>
+            <th class="col-narrow">تاريخ الدفع</th><th>المستأجر</th><th class="col-narrow">الشقة</th><th>المبلغ</th><th class="col-narrow">المدة (شهور)</th><th class="col-narrow">تاريخ الانتهاء</th><th class="col-narrow">طريقة الدفع</th><th>البنك</th><th>ملاحظات</th><th></th>
           </tr></thead>
           <tbody id="rentsTableBody"></tbody>
         </table>
@@ -288,7 +288,8 @@
       <div class="form-grid">
         <div class="field">
           <label>طريقة الدفع</label>
-          <select id="rentPaymentWay">
+          <select id="rentPaymentWay" required>
+            <option value="" disabled selected>اختر طريقة الدفع...</option>
             <option value="حواله">حوالة</option>
             <option value="نقداً">نقداً</option>
           </select>
@@ -296,6 +297,7 @@
         <div class="field" id="rentBankField">
           <label>اسم البنك</label>
           <select id="rentBank">
+            <option value="" disabled selected>اختر البنك...</option>
             <option value="البنك الأهلي السعودي">البنك الأهلي السعودي</option>
             <option value="بنك الرياض">بنك الرياض</option>
             <option value="مصرف الراجحي">مصرف الراجحي</option>
@@ -327,8 +329,17 @@
   </div>
 </div>
 
+<!-- ==================== نافذة الملاحظات ==================== -->
+<div class="modal-overlay" id="remarkModal">
+  <div class="modal" style="max-width:400px;">
+    <h3>ملاحظات</h3>
+    <p id="remarkModalText" style="font-size:14.5px; line-height:1.8; color:var(--text); margin:0 0 20px;"></p>
+    <button type="button" class="btn btn-primary" style="width:100%;" data-close-modal="remarkModal">إغلاق</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
-<script type="module" src="js/app.js?v=4"></script>
+<script type="module" src="js/app.js?v=5"></script>
 </body>
 </html>
