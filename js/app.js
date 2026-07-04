@@ -301,12 +301,12 @@ function renderRentsTable(filterText = "") {
   empty.style.display = "none";
   body.innerHTML = filtered.map(r => `
     <tr>
-      <td>${formatDate(r.dateOfPay)}</td>
+      <td class="date-cell">${formatDate(r.dateOfPay)}</td>
       <td>${r.renterName || "—"}</td>
       <td>${r.flatNumber != null ? arDigits(r.flatNumber) : "—"}</td>
       <td>${formatMoney(r.amount)} ريال</td>
       <td>${r.months != null ? arDigits(r.months) : "—"}</td>
-      <td>${formatDate(r.endOfRent)}</td>
+      <td class="date-cell">${formatDate(r.endOfRent)}</td>
       <td>${r.paymentWay || "—"}</td>
       <td>${r.bank || "—"}</td>
       <td class="remark-cell" ${r.remark ? `data-remark="${escapeAttr(r.remark)}" style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted;"` : ""}>${r.remark ? truncate(r.remark, 22) : "—"}</td>
@@ -569,7 +569,7 @@ function formatDate(d) {
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
-  return arDigits(`${day}/${month}/${year}`);
+  return arDigits(`${year}/${month}/${day}`);
 }
 function toDateInput(d) {
   if (!d) return "";
