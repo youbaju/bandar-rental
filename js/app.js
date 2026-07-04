@@ -132,16 +132,16 @@ function renderDashboard() {
   });
 
   document.getElementById("statGrid").innerHTML = `
-    <div class="stat-card"><div class="num">${total}</div><div class="label">إجمالي الشقق</div></div>
-    <div class="stat-card ok"><div class="num">${occupied}</div><div class="label">مؤجرة</div></div>
-    <div class="stat-card"><div class="num">${vacant}</div><div class="label">شاغرة</div></div>
-    <div class="stat-card warn"><div class="num">${warnCount}</div><div class="label">تنتهي قريباً</div></div>
-    <div class="stat-card alert"><div class="num">${overdueCount}</div><div class="label">متأخرة</div></div>
+    <div class="stat-card"><div class="num">${arDigits(total)}</div><div class="label">إجمالي الشقق</div></div>
+    <div class="stat-card ok"><div class="num">${arDigits(occupied)}</div><div class="label">مؤجرة</div></div>
+    <div class="stat-card"><div class="num">${arDigits(vacant)}</div><div class="label">شاغرة</div></div>
+    <div class="stat-card warn"><div class="num">${arDigits(warnCount)}</div><div class="label">تنتهي قريباً</div></div>
+    <div class="stat-card alert"><div class="num">${arDigits(overdueCount)}</div><div class="label">متأخرة</div></div>
   `;
 
   const badge = document.getElementById("navAlertBadge");
   const alertTotal = overdueCount + warnCount;
-  if (alertTotal > 0) { badge.style.display = "inline-block"; badge.textContent = alertTotal; }
+  if (alertTotal > 0) { badge.style.display = "inline-block"; badge.textContent = arDigits(alertTotal); }
   else badge.style.display = "none";
 
   renderBuilding();
@@ -175,12 +175,12 @@ function renderBuilding() {
         const { status, days } = computeFlatStatus(f);
         let statusLabel = "شاغرة";
         if (status === "ok") statusLabel = "مؤجرة";
-        else if (status === "warn") statusLabel = `تنتهي خلال ${days} يوم`;
-        else if (status === "overdue") statusLabel = `متأخرة ${Math.abs(days)} يوم`;
+        else if (status === "warn") statusLabel = `تنتهي خلال ${arDigits(days)} يوم`;
+        else if (status === "overdue") statusLabel = `متأخرة ${arDigits(Math.abs(days))} يوم`;
         return `
           <div class="unit-chip ${status}">
             <span class="dot"></span>
-            <div class="num">شقة ${f.flatNumber}</div>
+            <div class="num">شقة ${arDigits(f.flatNumber)}</div>
             <div class="status">${statusLabel}</div>
           </div>`;
       }).join("");
@@ -205,13 +205,13 @@ function renderAlertsList(alerts) {
       ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.7 18a1.8 1.8 0 001.5 2.7h15.6a1.8 1.8 0 001.5-2.7L13.7 3.9a1.8 1.8 0 00-3.4 0z"/></svg>`
       : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`;
     const text = a.type === "overdue"
-      ? `انتهى العقد منذ ${Math.abs(a.days)} يوم ولم يتم تجديده`
-      : `العقد ينتهي خلال ${a.days} يوم`;
+      ? `انتهى العقد منذ ${arDigits(Math.abs(a.days))} يوم ولم يتم تجديده`
+      : `العقد ينتهي خلال ${arDigits(a.days)} يوم`;
     return `
       <div class="alert-row ${a.type}">
         <div class="alert-icon">${icon}</div>
         <div class="alert-text">
-          <div class="t1">شقة ${a.flat.flatNumber} — ${renterName}</div>
+          <div class="t1">شقة ${arDigits(a.flat.flatNumber)} — ${renterName}</div>
           <div class="t2">${text}</div>
         </div>
         <div class="alert-tag">${a.type === "overdue" ? "متأخرة" : "قريباً"}</div>
@@ -232,9 +232,9 @@ function renderFlatsTable() {
   body.innerHTML = flatsCache.map(f => `
     <tr>
       <td>${f.flatFloor || "—"}</td>
-      <td>${f.flatNumber}</td>
+      <td>${arDigits(f.flatNumber)}</td>
       <td>${formatMoney(f.monthlRent)} ريال</td>
-      <td>${f.meterNumber || "—"}</td>
+      <td>${f.meterNumber ? arDigits(f.meterNumber) : "—"}</td>
       <td><span class="pill ${f.rented ? "ok" : "vacant"}">${f.rented ? "مؤجرة" : "شاغرة"}</span></td>
       <td>
         <div class="row-actions">
@@ -266,10 +266,10 @@ function renderRentersTable(filterText = "") {
   empty.style.display = "none";
   body.innerHTML = filtered.map(r => `
     <tr>
-      <td>${r.renterId || "—"}</td>
+      <td>${r.renterId ? arDigits(r.renterId) : "—"}</td>
       <td>${r.renterName || "—"}</td>
       <td>${r.nationality || "—"}</td>
-      <td dir="ltr" style="text-align:right;">${r.mobile || "—"}</td>
+      <td dir="ltr" style="text-align:right;">${r.mobile ? arDigits(r.mobile) : "—"}</td>
       <td>${r.workAddress || "—"}</td>
       <td>
         <div class="row-actions">
@@ -303,9 +303,9 @@ function renderRentsTable(filterText = "") {
     <tr>
       <td>${formatDate(r.dateOfPay)}</td>
       <td>${r.renterName || "—"}</td>
-      <td>${r.flatNumber ?? "—"}</td>
+      <td>${r.flatNumber != null ? arDigits(r.flatNumber) : "—"}</td>
       <td>${formatMoney(r.amount)} ريال</td>
-      <td>${r.months ?? "—"}</td>
+      <td>${r.months != null ? arDigits(r.months) : "—"}</td>
       <td>${formatDate(r.endOfRent)}</td>
       <td>${r.paymentWay || "—"}</td>
       <td>${r.bank || "—"}</td>
@@ -337,9 +337,9 @@ function populateRentSelects() {
   const renterSel = document.getElementById("rentRenter");
   const flatSel = document.getElementById("rentFlat");
   renterSel.innerHTML = `<option value="" disabled selected>اختر المستأجر...</option>` +
-    rentersCache.map(r => `<option value="${r.id}">${r.renterName} — ${r.renterId}</option>`).join("");
+    rentersCache.map(r => `<option value="${r.id}">${r.renterName} — ${arDigits(r.renterId)}</option>`).join("");
   flatSel.innerHTML = `<option value="" disabled selected>اختر الشقة...</option>` +
-    flatsCache.map(f => `<option value="${f.id}">شقة ${f.flatNumber} (${f.flatFloor || ""})</option>`).join("");
+    flatsCache.map(f => `<option value="${f.id}">شقة ${arDigits(f.flatNumber)} (${f.flatFloor || ""})</option>`).join("");
 }
 
 /* ============ نوافذ الإضافة/التعديل ============ */
@@ -553,15 +553,23 @@ async function deleteRent(id) {
 }
 
 /* ============ أدوات مساعدة ============ */
+function arDigits(v) {
+  if (v === null || v === undefined) return v;
+  const map = { "0":"٠","1":"١","2":"٢","3":"٣","4":"٤","5":"٥","6":"٦","7":"٧","8":"٨","9":"٩" };
+  return String(v).replace(/[0-9]/g, d => map[d]);
+}
 function formatMoney(n) {
-  if (n === undefined || n === null || isNaN(n)) return "0";
-  return Number(n).toLocaleString("ar-SA", { maximumFractionDigits: 2 });
+  if (n === undefined || n === null || isNaN(n)) return "٠";
+  return arDigits(Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 }));
 }
 function formatDate(d) {
   if (!d) return "—";
   const date = new Date(d);
   if (isNaN(date)) return "—";
-  return date.toLocaleDateString("ar-SA-u-ca-gregory", { year: "numeric", month: "2-digit", day: "2-digit" });
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return arDigits(`${day}/${month}/${year}`);
 }
 function toDateInput(d) {
   if (!d) return "";
