@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>إيجارات بندر</title>
-<link rel="stylesheet" href="css/style.css?v=12">
+<link rel="stylesheet" href="css/style.css?v=13">
 </head>
 <body>
 
@@ -338,8 +338,20 @@
   </div>
 </div>
 
+<!-- ==================== نافذة تأكيد الحذف ==================== -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal" style="max-width:400px;">
+    <h3>تأكيد الحذف</h3>
+    <p id="confirmModalText" style="font-size:14.5px; line-height:1.8; color:var(--text); margin:0 0 20px;"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="confirmCancelBtn">إلغاء</button>
+      <button type="button" class="btn btn-danger" id="confirmOkBtn">حذف</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
-<script type="module" src="js/app.js?v=10"></script>
+<script type="module" src="js/app.js?v=11"></script>
 </body>
 </html>

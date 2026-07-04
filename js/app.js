@@ -394,6 +394,24 @@ function showRemarkModal(text) {
   document.getElementById("remarkModalText").textContent = text;
   openModal("remarkModal");
 }
+function confirmAction(message) {
+  return new Promise((resolve) => {
+    document.getElementById("confirmModalText").textContent = message;
+    openModal("confirmModal");
+    const okBtn = document.getElementById("confirmOkBtn");
+    const cancelBtn = document.getElementById("confirmCancelBtn");
+    const cleanup = (result) => {
+      okBtn.removeEventListener("click", onOk);
+      cancelBtn.removeEventListener("click", onCancel);
+      closeModal("confirmModal");
+      resolve(result);
+    };
+    const onOk = () => cleanup(true);
+    const onCancel = () => cleanup(false);
+    okBtn.addEventListener("click", onOk);
+    cancelBtn.addEventListener("click", onCancel);
+  });
+}
 
 function openFlatModal(id) {
   const form = document.getElementById("flatForm");
@@ -534,19 +552,19 @@ function setupForms() {
 
 /* ============ الحذف ============ */
 async function deleteFlat(id) {
-  if (!confirm("هل تريد حذف هذه الشقة؟ لن يتم حذف سجلات الإيجار المرتبطة بها.")) return;
+  if (!await confirmAction("هل تريد حذف هذه الشقة؟ لن يتم حذف سجلات الإيجار المرتبطة بها.")) return;
   await deleteDoc(doc(db, "flats", id));
   showToast("تم حذف الشقة");
   await reloadAll();
 }
 async function deleteRenter(id) {
-  if (!confirm("هل تريد حذف هذا المستأجر؟")) return;
+  if (!await confirmAction("هل تريد حذف هذا المستأجر؟")) return;
   await deleteDoc(doc(db, "renters", id));
   showToast("تم حذف المستأجر");
   await reloadAll();
 }
 async function deleteRent(id) {
-  if (!confirm("هل تريد حذف سجل الإيجار هذا؟")) return;
+  if (!await confirmAction("هل تريد حذف سجل الإيجار هذا؟")) return;
   await deleteDoc(doc(db, "rents", id));
   showToast("تم حذف السجل");
   await reloadAll();
