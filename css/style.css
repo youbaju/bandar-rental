@@ -415,6 +415,14 @@ a { color: inherit; }
   overflow: hidden;
 }
 table { width: 100%; border-collapse: collapse; }
+.table-rents th:first-child, .table-rents td:first-child {
+  position: sticky;
+  right: 0;
+  z-index: 5;
+  box-shadow: -6px 0 8px -6px rgba(0,0,0,0.15);
+}
+.table-rents tbody td:first-child { background: var(--surface); }
+.table-rents tbody tr:hover td:first-child { background: var(--sand); }
 thead th {
   background: var(--sand-deep);
   color: var(--ink-soft);
