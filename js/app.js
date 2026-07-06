@@ -664,8 +664,12 @@ function renderRenterStats(renterDocId) {
       <td>${formatMoney(r.amount)} ريال</td>
       <td>${r.paymentWay || "—"}</td>
       <td>${bankCell(r)}</td>
-      <td>${r.remark ? truncate(r.remark, 30) : "—"}</td>
+      <td class="remark-cell" ${r.remark ? `data-remark="${escapeAttr(r.remark)}" style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted;"` : ""}>${r.remark ? truncate(r.remark, 22) : "—"}</td>
     </tr>`).join("");
+
+  body.querySelectorAll("[data-remark]").forEach(cell => {
+    cell.addEventListener("click", () => showRemarkModal(cell.dataset.remark));
+  });
 }
 
 function renderFlatStats(flatDocId) {
@@ -718,8 +722,12 @@ function renderFlatStats(flatDocId) {
       <td>${formatMoney(r.amount)} ريال</td>
       <td>${r.paymentWay || "—"}</td>
       <td>${bankCell(r)}</td>
-      <td>${r.remark ? truncate(r.remark, 30) : "—"}</td>
+      <td class="remark-cell" ${r.remark ? `data-remark="${escapeAttr(r.remark)}" style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted;"` : ""}>${r.remark ? truncate(r.remark, 22) : "—"}</td>
     </tr>`).join("");
+
+  body.querySelectorAll("[data-remark]").forEach(cell => {
+    cell.addEventListener("click", () => showRemarkModal(cell.dataset.remark));
+  });
 }
 
 /* ============ أدوات مساعدة ============ */
