@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>إيجارات بندر</title>
-<link rel="stylesheet" href="css/style.css?v=13">
+<link rel="stylesheet" href="css/style.css?v=14">
 </head>
 <body>
 
@@ -42,6 +42,10 @@
       <button class="nav-item" data-section="rents">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>
         سجل الإيجارات
+      </button>
+      <button class="nav-item" data-section="stats">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>
+        الإحصائيات
       </button>
 
       <div class="nav-user-info" id="navUserInfo">—</div>
@@ -171,6 +175,63 @@
         </table>
         </div>
         <div id="rentsEmpty" class="table-empty" style="display:none;">لا توجد عمليات إيجار مسجلة بعد</div>
+      </div>
+    </section>
+
+    <!-- ==================== الإحصائيات ==================== -->
+    <section class="section" id="section-stats">
+      <div class="page-head">
+        <div>
+          <h1>الإحصائيات</h1>
+          <p>تاريخ الإيجار بالتفصيل — حسب المستأجر أو حسب الشقة</p>
+        </div>
+      </div>
+
+      <div class="stats-tabs">
+        <button class="stats-tab active" data-stats-tab="renter">حسب المستأجر</button>
+        <button class="stats-tab" data-stats-tab="flat">حسب الشقة</button>
+      </div>
+
+      <!-- تبويب: حسب المستأجر -->
+      <div class="stats-panel active" id="statsPanel-renter">
+        <div class="toolbar">
+          <select id="statsRenterSelect" class="search-box" style="max-width:340px;">
+            <option value="" disabled selected>اختر المستأجر...</option>
+          </select>
+        </div>
+        <div class="stat-grid" id="statsRenterSummary"></div>
+        <div class="table-card">
+          <div style="overflow-x:auto;">
+          <table>
+            <thead><tr>
+              <th>رقم الشقة</th><th>تاريخ البداية</th><th>تاريخ الانتهاء</th><th>المدة (شهور)</th><th>المبلغ</th><th>طريقة الدفع</th><th>البنك</th><th>ملاحظات</th>
+            </tr></thead>
+            <tbody id="statsRenterTableBody"></tbody>
+          </table>
+          </div>
+          <div id="statsRenterEmpty" class="table-empty">اختر مستأجراً لعرض تاريخه</div>
+        </div>
+      </div>
+
+      <!-- تبويب: حسب الشقة -->
+      <div class="stats-panel" id="statsPanel-flat">
+        <div class="toolbar">
+          <select id="statsFlatSelect" class="search-box" style="max-width:340px;">
+            <option value="" disabled selected>اختر الشقة...</option>
+          </select>
+        </div>
+        <div class="stat-grid" id="statsFlatSummary"></div>
+        <div class="table-card">
+          <div style="overflow-x:auto;">
+          <table>
+            <thead><tr>
+              <th>المستأجر</th><th>تاريخ البداية</th><th>تاريخ الانتهاء</th><th>المدة (شهور)</th><th>المبلغ</th><th>طريقة الدفع</th><th>البنك</th><th>ملاحظات</th>
+            </tr></thead>
+            <tbody id="statsFlatTableBody"></tbody>
+          </table>
+          </div>
+          <div id="statsFlatEmpty" class="table-empty">اختر شقة لعرض تاريخها</div>
+        </div>
       </div>
     </section>
 
@@ -352,6 +413,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script type="module" src="js/app.js?v=11"></script>
+<script type="module" src="js/app.js?v=12"></script>
 </body>
 </html>

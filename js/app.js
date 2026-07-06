@@ -41,6 +41,7 @@ async function init() {
   setupModals();
   setupForms();
   setupSearch();
+  setupStats();
   await reloadAll();
 }
 
@@ -51,6 +52,7 @@ async function reloadAll() {
   renderRentersTable();
   renderRentsTable();
   populateRentSelects();
+  populateStatsSelects();
 }
 
 async function loadFlats() {
@@ -568,6 +570,156 @@ async function deleteRent(id) {
   await deleteDoc(doc(db, "rents", id));
   showToast("تم حذف السجل");
   await reloadAll();
+}
+
+/* ============ الإحصائيات ============ */
+function setupStats() {
+  document.querySelectorAll(".stats-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".stats-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      document.querySelectorAll(".stats-panel").forEach(p => p.classList.remove("active"));
+      document.getElementById("statsPanel-" + tab.dataset.statsTab).classList.add("active");
+    });
+  });
+
+  document.getElementById("statsRenterSelect").addEventListener("change", (e) => renderRenterStats(e.target.value));
+  document.getElementById("statsFlatSelect").addEventListener("change", (e) => renderFlatStats(e.target.value));
+}
+
+// نعيد ملء القائمتين مع الحفاظ على الاختيار الحالي (لو موجود) وتحديث الجدول تلقائياً
+function populateStatsSelects() {
+  const renterSel = document.getElementById("statsRenterSelect");
+  const flatSel = document.getElementById("statsFlatSelect");
+  const prevRenter = renterSel.value;
+  const prevFlat = flatSel.value;
+
+  renterSel.innerHTML = `<option value="" disabled ${!prevRenter ? "selected" : ""}>اختر المستأجر...</option>` +
+    rentersCache.map(r => `<option value="${r.id}">${r.renterName} — ${arDigits(r.renterId)}</option>`).join("");
+  flatSel.innerHTML = `<option value="" disabled ${!prevFlat ? "selected" : ""}>اختر الشقة...</option>` +
+    flatsCache.map(f => `<option value="${f.id}">شقة ${arDigits(f.flatNumber)} (${f.flatFloor || ""})</option>`).join("");
+
+  if (prevRenter && rentersCache.some(r => r.id === prevRenter)) {
+    renterSel.value = prevRenter;
+    renderRenterStats(prevRenter);
+  }
+  if (prevFlat && flatsCache.some(f => f.id === prevFlat)) {
+    flatSel.value = prevFlat;
+    renderFlatStats(prevFlat);
+  }
+}
+
+function bankCell(r) {
+  return r.paymentWay === "حواله" ? (r.bank || "—") : "—";
+}
+
+function renderRenterStats(renterDocId) {
+  const body = document.getElementById("statsRenterTableBody");
+  const empty = document.getElementById("statsRenterEmpty");
+  const summary = document.getElementById("statsRenterSummary");
+  const renter = rentersCache.find(r => r.id === renterDocId);
+
+  if (!renter) {
+    body.innerHTML = "";
+    summary.innerHTML = "";
+    empty.style.display = "block";
+    empty.textContent = "اختر مستأجراً لعرض تاريخه";
+    return;
+  }
+
+  // مستأجر واحد ممكن يكون مستأجراً لأكثر من شقة بنفس الوقت، فنجمع كل سجلاته عبر كل الشقق
+  const records = rentsCache
+    .filter(r => r.renterId === renter.renterId)
+    .slice()
+    .sort((a, b) => new Date(a.dateOfRent || 0) - new Date(b.dateOfRent || 0));
+
+  if (records.length === 0) {
+    body.innerHTML = "";
+    empty.style.display = "block";
+    empty.textContent = "لا توجد سجلات إيجار لهذا المستأجر";
+    summary.innerHTML = `
+      <div class="stat-card"><div class="num">—</div><div class="label">تاريخ أول عقد</div></div>
+      <div class="stat-card"><div class="num">٠</div><div class="label">عدد الشقق المستأجرة</div></div>
+      <div class="stat-card"><div class="num">٠ ريال</div><div class="label">إجمالي المدفوعات</div></div>
+    `;
+    return;
+  }
+  empty.style.display = "none";
+
+  const distinctFlats = new Set(records.map(r => r.flatNumber)).size;
+  const totalPaid = records.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+
+  summary.innerHTML = `
+    <div class="stat-card"><div class="num">${formatDate(records[0].dateOfRent)}</div><div class="label">تاريخ أول عقد</div></div>
+    <div class="stat-card ok"><div class="num">${arDigits(distinctFlats)}</div><div class="label">عدد الشقق المستأجرة</div></div>
+    <div class="stat-card"><div class="num">${formatMoney(totalPaid)} ريال</div><div class="label">إجمالي المدفوعات</div></div>
+  `;
+
+  body.innerHTML = records.map(r => `
+    <tr>
+      <td>${r.flatNumber != null ? arDigits(r.flatNumber) : "—"}</td>
+      <td class="date-cell">${formatDate(r.dateOfRent)}</td>
+      <td class="date-cell">${formatDate(r.endOfRent)}</td>
+      <td>${r.months != null ? arDigits(r.months) : "—"}</td>
+      <td>${formatMoney(r.amount)} ريال</td>
+      <td>${r.paymentWay || "—"}</td>
+      <td>${bankCell(r)}</td>
+      <td>${r.remark ? truncate(r.remark, 30) : "—"}</td>
+    </tr>`).join("");
+}
+
+function renderFlatStats(flatDocId) {
+  const body = document.getElementById("statsFlatTableBody");
+  const empty = document.getElementById("statsFlatEmpty");
+  const summary = document.getElementById("statsFlatSummary");
+  const flat = flatsCache.find(f => f.id === flatDocId);
+
+  if (!flat) {
+    body.innerHTML = "";
+    summary.innerHTML = "";
+    empty.style.display = "block";
+    empty.textContent = "اختر شقة لعرض تاريخها";
+    return;
+  }
+
+  const records = rentsCache
+    .filter(r => Number(r.flatNumber) === Number(flat.flatNumber))
+    .slice()
+    .sort((a, b) => new Date(a.dateOfRent || 0) - new Date(b.dateOfRent || 0));
+
+  if (records.length === 0) {
+    body.innerHTML = "";
+    empty.style.display = "block";
+    empty.textContent = "لا توجد سجلات إيجار لهذه الشقة";
+    summary.innerHTML = `
+      <div class="stat-card"><div class="num">—</div><div class="label">تاريخ أول تأجير</div></div>
+      <div class="stat-card"><div class="num">٠</div><div class="label">عدد المستأجرين</div></div>
+      <div class="stat-card"><div class="num">٠ ريال</div><div class="label">إجمالي الدخل</div></div>
+    `;
+    return;
+  }
+  empty.style.display = "none";
+
+  const distinctRenters = new Set(records.map(r => r.renterId)).size;
+  const totalIncome = records.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+
+  summary.innerHTML = `
+    <div class="stat-card"><div class="num">${formatDate(records[0].dateOfRent)}</div><div class="label">تاريخ أول تأجير</div></div>
+    <div class="stat-card ok"><div class="num">${arDigits(distinctRenters)}</div><div class="label">عدد المستأجرين</div></div>
+    <div class="stat-card"><div class="num">${formatMoney(totalIncome)} ريال</div><div class="label">إجمالي الدخل</div></div>
+  `;
+
+  body.innerHTML = records.map(r => `
+    <tr>
+      <td>${r.renterName || "—"}</td>
+      <td class="date-cell">${formatDate(r.dateOfRent)}</td>
+      <td class="date-cell">${formatDate(r.endOfRent)}</td>
+      <td>${r.months != null ? arDigits(r.months) : "—"}</td>
+      <td>${formatMoney(r.amount)} ريال</td>
+      <td>${r.paymentWay || "—"}</td>
+      <td>${bankCell(r)}</td>
+      <td>${r.remark ? truncate(r.remark, 30) : "—"}</td>
+    </tr>`).join("");
 }
 
 /* ============ أدوات مساعدة ============ */
