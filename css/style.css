@@ -267,7 +267,7 @@ a { color: inherit; }
 .main {
   flex: 1;
   padding: 30px 36px 60px;
-  max-width: 1180px;
+  max-width: 1600px;
 }
 
 .page-head {
@@ -414,7 +414,11 @@ a { color: inherit; }
   box-shadow: var(--shadow);
   overflow: hidden;
 }
-table { width: 100%; border-collapse: collapse; }
+.table-scroll {
+  overflow: auto;
+  max-height: 74vh;
+}
+table { width: 100%; border-collapse: separate; border-spacing: 0; }
 .table-rents .col-narrow { width: 68px; white-space: normal; line-height: 1.3; text-align: center; }
 thead th {
   background: var(--sand-deep);
@@ -574,7 +578,7 @@ tbody tr:hover { background: var(--sand); }
   .form-grid { grid-template-columns: 1fr; }
   .floor-row { flex-direction: column; align-items: stretch; }
   .floor-label { width: auto; text-align: right; }
-  thead th { top: 62px; }
+  .table-scroll { max-height: calc(100vh - 190px); }
   .table-rents th:last-child, .table-rents td:last-child {
     position: sticky;
     left: 0;

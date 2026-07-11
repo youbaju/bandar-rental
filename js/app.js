@@ -290,10 +290,6 @@ function renderRentersTable(filterText = "") {
       <td>
         <div class="row-actions">
           <button class="icon-btn" data-archive-renter="${r.id}" title="أرشفة">${archiveIcon()}</button>
-        </div>
-      </td>
-      <td>
-        <div class="row-actions">
           <button class="icon-btn" data-edit-renter="${r.id}" title="تعديل">${editIcon()}</button>
           <button class="icon-btn danger" data-del-renter="${r.id}" title="حذف">${trashIcon()}</button>
         </div>

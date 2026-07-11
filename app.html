@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>إيجارات بندر</title>
-<link rel="stylesheet" href="css/style.css?v=15">
+<link rel="stylesheet" href="css/style.css?v=19">
 </head>
 <body>
 
@@ -114,7 +114,7 @@
         </button>
       </div>
       <div class="table-card">
-        <div style="overflow-x:auto;">
+        <div class="table-scroll">
         <table>
           <thead><tr>
             <th>الدور</th><th>رقم الشقة</th><th>الإيجار الشهري</th><th>رقم العداد</th><th>الحالة</th><th></th>
@@ -142,10 +142,10 @@
         <input type="text" class="search-box" id="rentersSearch" placeholder="ابحث بالاسم أو رقم الهوية...">
       </div>
       <div class="table-card">
-        <div style="overflow-x:auto;">
+        <div class="table-scroll">
         <table>
           <thead><tr>
-            <th>رقم الهوية</th><th>الاسم</th><th>الجنسية</th><th>الجوال</th><th>جهة العمل</th><th></th><th></th>
+            <th>رقم الهوية</th><th>الاسم</th><th>الجنسية</th><th>الجوال</th><th>جهة العمل</th><th></th>
           </tr></thead>
           <tbody id="rentersTableBody"></tbody>
         </table>
@@ -170,7 +170,7 @@
         <input type="text" class="search-box" id="rentsSearch" placeholder="ابحث باسم المستأجر أو رقم الشقة...">
       </div>
       <div class="table-card">
-        <div style="overflow-x:auto;">
+        <div class="table-scroll">
         <table class="table-rents">
           <thead><tr>
             <th class="col-narrow">تاريخ السداد</th><th>المستأجر</th><th class="col-narrow">الشقة</th><th>المبلغ</th><th class="col-narrow">المدة (شهور)</th><th class="col-narrow">تاريخ الانتهاء</th><th class="col-narrow">طريقة الدفع</th><th>البنك</th><th>ملاحظات</th><th></th>
@@ -205,7 +205,7 @@
         </div>
         <div class="stat-grid" id="statsRenterSummary"></div>
         <div class="table-card">
-          <div style="overflow-x:auto;">
+          <div class="table-scroll">
           <table>
             <thead><tr>
               <th>رقم الشقة</th><th>تاريخ البداية</th><th>تاريخ السداد</th><th>تاريخ الانتهاء</th><th>المدة (شهور)</th><th>المبلغ</th><th>طريقة الدفع</th><th>البنك</th><th>ملاحظات</th>
@@ -226,7 +226,7 @@
         </div>
         <div class="stat-grid" id="statsFlatSummary"></div>
         <div class="table-card">
-          <div style="overflow-x:auto;">
+          <div class="table-scroll">
           <table>
             <thead><tr>
               <th>المستأجر</th><th>تاريخ البداية</th><th>تاريخ السداد</th><th>تاريخ الانتهاء</th><th>المدة (شهور)</th><th>المبلغ</th><th>طريقة الدفع</th><th>البنك</th><th>ملاحظات</th>
@@ -248,7 +248,7 @@
         </div>
       </div>
       <div class="table-card">
-        <div style="overflow-x:auto;">
+        <div class="table-scroll">
         <table>
           <thead><tr>
             <th>الاسم</th><th>رقم الهوية</th><th>الجنسية</th><th>تاريخ الأرشفة</th><th>عدد السجلات المؤرشفة</th><th></th>
@@ -267,7 +267,7 @@
 <div class="modal-overlay" id="archiveDetailModal">
   <div class="modal" style="max-width:760px;">
     <h3 id="archiveDetailTitle">سجلات المستأجر</h3>
-    <div style="overflow-x:auto;">
+    <div class="table-scroll">
     <table>
       <thead><tr>
         <th>رقم الشقة</th><th>تاريخ البداية</th><th>تاريخ السداد</th><th>تاريخ الانتهاء</th><th>المدة</th><th>المبلغ</th><th>طريقة الدفع</th><th>البنك</th><th>ملاحظات</th>
@@ -456,6 +456,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script type="module" src="js/app.js?v=14"></script>
+<script type="module" src="js/app.js?v=15"></script>
 </body>
 </html>
