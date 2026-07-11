@@ -427,6 +427,9 @@ thead th {
   white-space: nowrap;
   border-inline-end: 1px solid var(--border);
   border-inline-start: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 3;
 }
 thead th:last-child { border-inline-end: none; }
 thead th:first-child { border-inline-start: none; }
@@ -571,6 +574,7 @@ tbody tr:hover { background: var(--sand); }
   .form-grid { grid-template-columns: 1fr; }
   .floor-row { flex-direction: column; align-items: stretch; }
   .floor-label { width: auto; text-align: right; }
+  thead th { top: 62px; }
   .table-rents th:last-child, .table-rents td:last-child {
     position: sticky;
     left: 0;

@@ -28,11 +28,15 @@ document.getElementById("logoutBtnMobile")?.addEventListener("click", async () =
 let flatsCache = [];
 let rentersCache = [];
 let rentsCache = [];
+let archivedRentersCache = [];
+let archivedRentsCache = [];
 let initialized = false;
 
 const flatsCol = collection(db, "flats");
 const rentersCol = collection(db, "renters");
 const rentsCol = collection(db, "rents");
+const archivedRentersCol = collection(db, "archivedRenters");
+const archivedRentsCol = collection(db, "archivedRents");
 
 async function init() {
   if (initialized) return;
@@ -46,11 +50,12 @@ async function init() {
 }
 
 async function reloadAll() {
-  await Promise.all([loadFlats(), loadRenters(), loadRents()]);
+  await Promise.all([loadFlats(), loadRenters(), loadRents(), loadArchivedRenters(), loadArchivedRents()]);
   renderDashboard();
   renderFlatsTable();
   renderRentersTable();
   renderRentsTable();
+  renderArchiveTable();
   populateRentSelects();
   populateStatsSelects();
 }
@@ -69,6 +74,15 @@ async function loadRents() {
   const snap = await getDocs(rentsCol);
   rentsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   rentsCache.sort((a, b) => new Date(b.dateOfPay || b.dateOfRent || 0) - new Date(a.dateOfPay || a.dateOfRent || 0));
+}
+async function loadArchivedRenters() {
+  const snap = await getDocs(archivedRentersCol);
+  archivedRentersCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  archivedRentersCache.sort((a, b) => new Date(b.archivedAt || 0) - new Date(a.archivedAt || 0));
+}
+async function loadArchivedRents() {
+  const snap = await getDocs(archivedRentsCol);
+  archivedRentsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
 /* ============ التنقل بين الأقسام ============ */
@@ -275,6 +289,11 @@ function renderRentersTable(filterText = "") {
       <td>${r.workAddress || "—"}</td>
       <td>
         <div class="row-actions">
+          <button class="icon-btn" data-archive-renter="${r.id}" title="أرشفة">${archiveIcon()}</button>
+        </div>
+      </td>
+      <td>
+        <div class="row-actions">
           <button class="icon-btn" data-edit-renter="${r.id}" title="تعديل">${editIcon()}</button>
           <button class="icon-btn danger" data-del-renter="${r.id}" title="حذف">${trashIcon()}</button>
         </div>
@@ -283,6 +302,7 @@ function renderRentersTable(filterText = "") {
 
   body.querySelectorAll("[data-edit-renter]").forEach(b => b.addEventListener("click", () => openRenterModal(b.dataset.editRenter)));
   body.querySelectorAll("[data-del-renter]").forEach(b => b.addEventListener("click", () => deleteRenter(b.dataset.delRenter)));
+  body.querySelectorAll("[data-archive-renter]").forEach(b => b.addEventListener("click", () => archiveRenter(b.dataset.archiveRenter)));
 }
 
 /* ============ جدول الإيجارات ============ */
@@ -335,13 +355,18 @@ function setupSearch() {
 }
 
 /* ============ اختيارات نموذج الإيجار ============ */
-function populateRentSelects() {
+// selectedFlatId: عند التعديل، نمرر id الشقة الحالية عشان تبقى بالقائمة حتى لو كانت "مؤجرة"
+// عند الإضافة (بدون تمرير id)، نعرض الشقق الشاغرة فقط لمنع تسجيل عقد جديد على شقة مؤجرة أصلاً
+function populateRentSelects(selectedFlatId = null) {
   const renterSel = document.getElementById("rentRenter");
   const flatSel = document.getElementById("rentFlat");
   renterSel.innerHTML = `<option value="" disabled selected>اختر المستأجر...</option>` +
     rentersCache.map(r => `<option value="${r.id}">${r.renterName} — ${arDigits(r.renterId)}</option>`).join("");
+
+  const flatsToShow = flatsCache.filter(f => !f.rented || f.id === selectedFlatId);
   flatSel.innerHTML = `<option value="" disabled selected>اختر الشقة...</option>` +
-    flatsCache.map(f => `<option value="${f.id}">شقة ${arDigits(f.flatNumber)} (${f.flatFloor || ""})</option>`).join("");
+    flatsToShow.map(f => `<option value="${f.id}">شقة ${arDigits(f.flatNumber)} (${f.flatFloor || ""})</option>`).join("") +
+    (flatsToShow.length < flatsCache.length ? `<option value="" disabled>— الشقق المؤجرة غير متاحة لعقد جديد —</option>` : "");
 }
 
 /* ============ نوافذ الإضافة/التعديل ============ */
@@ -396,8 +421,9 @@ function showRemarkModal(text) {
   document.getElementById("remarkModalText").textContent = text;
   openModal("remarkModal");
 }
-function confirmAction(message) {
+function confirmAction(message, title = "تأكيد الحذف") {
   return new Promise((resolve) => {
+    document.getElementById("confirmModalTitle").textContent = title;
     document.getElementById("confirmModalText").textContent = message;
     openModal("confirmModal");
     const okBtn = document.getElementById("confirmOkBtn");
@@ -454,13 +480,13 @@ function openRentModal(id) {
   form.reset();
   document.getElementById("rentId").value = "";
   document.getElementById("rentModalTitle").textContent = id ? "تعديل دفعة" : "تسجيل دفعة إيجار";
-  populateRentSelects();
   if (id) {
     const r = rentsCache.find(x => x.id === id);
+    const flatMatch = flatsCache.find(x => Number(x.flatNumber) === Number(r.flatNumber));
+    populateRentSelects(flatMatch ? flatMatch.id : null);
     document.getElementById("rentId").value = r.id;
     const renterMatch = rentersCache.find(x => x.renterId === r.renterId);
     if (renterMatch) document.getElementById("rentRenter").value = renterMatch.id;
-    const flatMatch = flatsCache.find(x => Number(x.flatNumber) === Number(r.flatNumber));
     if (flatMatch) document.getElementById("rentFlat").value = flatMatch.id;
     document.getElementById("rentDateStart").value = toDateInput(r.dateOfRent);
     document.getElementById("rentMonths").value = r.months ?? "";
@@ -471,6 +497,7 @@ function openRentModal(id) {
     document.getElementById("rentReason").value = r.reason || "";
     document.getElementById("rentRemark").value = r.remark || "";
   } else {
+    populateRentSelects();
     setSelectedBank("");
   }
   updateBankFieldVisibility();
@@ -523,6 +550,10 @@ function setupForms() {
     const renter = rentersCache.find(r => r.id === document.getElementById("rentRenter").value);
     const flat = flatsCache.find(f => f.id === document.getElementById("rentFlat").value);
     if (!renter || !flat) { showToast("اختر المستأجر والشقة", true); return; }
+    if (!id && flat.rented) {
+      showToast("هذه الشقة مؤجرة حالياً — غيّر حالتها إلى شاغرة أولاً من صفحة الشقق", true);
+      return;
+    }
 
     const dateStart = document.getElementById("rentDateStart").value;
     const months = Number(document.getElementById("rentMonths").value);
@@ -639,8 +670,8 @@ function renderRenterStats(renterDocId) {
     empty.textContent = "لا توجد سجلات إيجار لهذا المستأجر";
     summary.innerHTML = `
       <div class="stat-card"><div class="num">—</div><div class="label">تاريخ أول عقد</div></div>
-      <div class="stat-card"><div class="num">٠</div><div class="label">عدد الشقق المستأجرة</div></div>
-      <div class="stat-card"><div class="num">٠ ريال</div><div class="label">إجمالي المدفوعات</div></div>
+      <div class="stat-card"><div class="num">0</div><div class="label">عدد الشقق المستأجرة</div></div>
+      <div class="stat-card"><div class="num">0 ريال</div><div class="label">إجمالي المدفوعات</div></div>
     `;
     return;
   }
@@ -659,6 +690,7 @@ function renderRenterStats(renterDocId) {
     <tr>
       <td>${r.flatNumber != null ? arDigits(r.flatNumber) : "—"}</td>
       <td class="date-cell">${formatDate(r.dateOfRent)}</td>
+      <td class="date-cell">${formatDate(r.dateOfPay)}</td>
       <td class="date-cell">${formatDate(r.endOfRent)}</td>
       <td>${r.months != null ? arDigits(r.months) : "—"}</td>
       <td>${formatMoney(r.amount)} ريال</td>
@@ -697,8 +729,8 @@ function renderFlatStats(flatDocId) {
     empty.textContent = "لا توجد سجلات إيجار لهذه الشقة";
     summary.innerHTML = `
       <div class="stat-card"><div class="num">—</div><div class="label">تاريخ أول تأجير</div></div>
-      <div class="stat-card"><div class="num">٠</div><div class="label">عدد المستأجرين</div></div>
-      <div class="stat-card"><div class="num">٠ ريال</div><div class="label">إجمالي الدخل</div></div>
+      <div class="stat-card"><div class="num">0</div><div class="label">عدد المستأجرين</div></div>
+      <div class="stat-card"><div class="num">0 ريال</div><div class="label">إجمالي الدخل</div></div>
     `;
     return;
   }
@@ -717,6 +749,7 @@ function renderFlatStats(flatDocId) {
     <tr>
       <td>${r.renterName || "—"}</td>
       <td class="date-cell">${formatDate(r.dateOfRent)}</td>
+      <td class="date-cell">${formatDate(r.dateOfPay)}</td>
       <td class="date-cell">${formatDate(r.endOfRent)}</td>
       <td>${r.months != null ? arDigits(r.months) : "—"}</td>
       <td>${formatMoney(r.amount)} ريال</td>
@@ -730,15 +763,122 @@ function renderFlatStats(flatDocId) {
   });
 }
 
+/* ============ الأرشيف ============ */
+function renderArchiveTable() {
+  const body = document.getElementById("archiveTableBody");
+  const empty = document.getElementById("archiveEmpty");
+  if (archivedRentersCache.length === 0) {
+    body.innerHTML = "";
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  body.innerHTML = archivedRentersCache.map(r => {
+    const count = archivedRentsCache.filter(x => x.renterId === r.renterId).length;
+    return `
+    <tr>
+      <td>${r.renterName || "—"}</td>
+      <td>${r.renterId ? arDigits(r.renterId) : "—"}</td>
+      <td>${r.nationality || "—"}</td>
+      <td class="date-cell">${formatDate(r.archivedAt)}</td>
+      <td>${arDigits(count)}</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" data-view-archive="${r.id}" title="عرض السجلات">${noteIcon()}</button>
+          <button class="icon-btn" data-restore-renter="${r.id}" title="استعادة">${restoreIcon()}</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+
+  body.querySelectorAll("[data-view-archive]").forEach(b => b.addEventListener("click", () => showArchiveDetail(b.dataset.viewArchive)));
+  body.querySelectorAll("[data-restore-renter]").forEach(b => b.addEventListener("click", () => restoreRenter(b.dataset.restoreRenter)));
+}
+
+function showArchiveDetail(archivedRenterId) {
+  const renter = archivedRentersCache.find(r => r.id === archivedRenterId);
+  if (!renter) return;
+  document.getElementById("archiveDetailTitle").textContent = `سجلات المستأجر — ${renter.renterName}`;
+  const records = archivedRentsCache
+    .filter(r => r.renterId === renter.renterId)
+    .slice()
+    .sort((a, b) => new Date(a.dateOfRent || 0) - new Date(b.dateOfRent || 0));
+
+  document.getElementById("archiveDetailTableBody").innerHTML = records.map(r => `
+    <tr>
+      <td>${r.flatNumber != null ? arDigits(r.flatNumber) : "—"}</td>
+      <td class="date-cell">${formatDate(r.dateOfRent)}</td>
+      <td class="date-cell">${formatDate(r.dateOfPay)}</td>
+      <td class="date-cell">${formatDate(r.endOfRent)}</td>
+      <td>${r.months != null ? arDigits(r.months) : "—"}</td>
+      <td>${formatMoney(r.amount)} ريال</td>
+      <td>${r.paymentWay || "—"}</td>
+      <td>${bankCell(r)}</td>
+      <td>${r.remark || "—"}</td>
+    </tr>`).join("");
+
+  openModal("archiveDetailModal");
+}
+
+async function archiveRenter(id) {
+  const renter = rentersCache.find(r => r.id === id);
+  if (!renter) return;
+  const relatedRents = rentsCache.filter(r => r.renterId === renter.renterId);
+
+  if (!await confirmAction(
+    `هل تريد أرشفة المستأجر "${renter.renterName}"؟ سيتم نقله مع ${relatedRents.length} سجل إيجار إلى الأرشيف، وإزالته من السجلات الحالية.`,
+    "تأكيد الأرشفة"
+  )) return;
+
+  try {
+    for (const rent of relatedRents) {
+      const { id: rentId, ...rentData } = rent;
+      await addDoc(archivedRentsCol, { ...rentData, archivedAt: new Date().toISOString() });
+      await deleteDoc(doc(db, "rents", rentId));
+    }
+    const { id: renterId, ...renterData } = renter;
+    await addDoc(archivedRentersCol, { ...renterData, archivedAt: new Date().toISOString() });
+    await deleteDoc(doc(db, "renters", renterId));
+
+    showToast("تم أرشفة المستأجر وسجلاته");
+    await reloadAll();
+  } catch (err) { showToast("حدث خطأ أثناء الأرشفة", true); }
+}
+
+async function restoreRenter(id) {
+  const renter = archivedRentersCache.find(r => r.id === id);
+  if (!renter) return;
+  const relatedRents = archivedRentsCache.filter(r => r.renterId === renter.renterId);
+
+  if (!await confirmAction(
+    `هل تريد استعادة المستأجر "${renter.renterName}" من الأرشيف؟ سيتم إرجاعه مع ${relatedRents.length} سجل إيجار إلى السجلات الحالية.`,
+    "تأكيد الاستعادة من الأرشيف"
+  )) return;
+
+  try {
+    for (const rent of relatedRents) {
+      const { id: rentId, archivedAt, ...rentData } = rent;
+      await addDoc(rentsCol, rentData);
+      await deleteDoc(doc(db, "archivedRents", rentId));
+    }
+    const { id: renterId, archivedAt, ...renterData } = renter;
+    await addDoc(rentersCol, renterData);
+    await deleteDoc(doc(db, "archivedRenters", renterId));
+
+    closeModal("archiveDetailModal");
+    showToast("تم استعادة المستأجر وسجلاته");
+    await reloadAll();
+  } catch (err) { showToast("حدث خطأ أثناء الاستعادة", true); }
+}
+
 /* ============ أدوات مساعدة ============ */
 function arDigits(v) {
   if (v === null || v === undefined) return v;
-  const map = { "0":"٠","1":"١","2":"٢","3":"٣","4":"٤","5":"٥","6":"٦","7":"٧","8":"٨","9":"٩" };
-  return String(v).replace(/[0-9]/g, d => map[d]);
+  return String(v);
 }
 function formatMoney(n) {
-  if (n === undefined || n === null || isNaN(n)) return "٠";
-  return arDigits(Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 }));
+  if (n === undefined || n === null || isNaN(n)) return "0";
+  return Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
 }
 function formatDate(d) {
   if (!d) return "—";
@@ -780,6 +920,12 @@ function trashIcon() {
 }
 function noteIcon() {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v12H8l-4 4V4z"/></svg>`;
+}
+function archiveIcon() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 002 2h10a2 2 0 002-2V9"/><path d="M10 13h4"/></svg>`;
+}
+function restoreIcon() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-7 3L3 8"/><path d="M3 3v5h5"/></svg>`;
 }
 function truncate(s, n) {
   s = String(s);

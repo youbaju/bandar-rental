@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>إيجارات بندر</title>
-<link rel="stylesheet" href="css/style.css?v=14">
+<link rel="stylesheet" href="css/style.css?v=15">
 </head>
 <body>
 
@@ -46,6 +46,10 @@
       <button class="nav-item" data-section="stats">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>
         الإحصائيات
+      </button>
+      <button class="nav-item" data-section="archive">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 002 2h10a2 2 0 002-2V9"/><path d="M10 13h4"/></svg>
+        الأرشيف
       </button>
 
       <div class="nav-user-info" id="navUserInfo">—</div>
@@ -141,7 +145,7 @@
         <div style="overflow-x:auto;">
         <table>
           <thead><tr>
-            <th>رقم الهوية</th><th>الاسم</th><th>الجنسية</th><th>الجوال</th><th>جهة العمل</th><th></th>
+            <th>رقم الهوية</th><th>الاسم</th><th>الجنسية</th><th>الجوال</th><th>جهة العمل</th><th></th><th></th>
           </tr></thead>
           <tbody id="rentersTableBody"></tbody>
         </table>
@@ -169,7 +173,7 @@
         <div style="overflow-x:auto;">
         <table class="table-rents">
           <thead><tr>
-            <th class="col-narrow">تاريخ الدفع</th><th>المستأجر</th><th class="col-narrow">الشقة</th><th>المبلغ</th><th class="col-narrow">المدة (شهور)</th><th class="col-narrow">تاريخ الانتهاء</th><th class="col-narrow">طريقة الدفع</th><th>البنك</th><th>ملاحظات</th><th></th>
+            <th class="col-narrow">تاريخ السداد</th><th>المستأجر</th><th class="col-narrow">الشقة</th><th>المبلغ</th><th class="col-narrow">المدة (شهور)</th><th class="col-narrow">تاريخ الانتهاء</th><th class="col-narrow">طريقة الدفع</th><th>البنك</th><th>ملاحظات</th><th></th>
           </tr></thead>
           <tbody id="rentsTableBody"></tbody>
         </table>
@@ -204,7 +208,7 @@
           <div style="overflow-x:auto;">
           <table>
             <thead><tr>
-              <th>رقم الشقة</th><th>تاريخ البداية</th><th>تاريخ الانتهاء</th><th>المدة (شهور)</th><th>المبلغ</th><th>طريقة الدفع</th><th>البنك</th><th>ملاحظات</th>
+              <th>رقم الشقة</th><th>تاريخ البداية</th><th>تاريخ السداد</th><th>تاريخ الانتهاء</th><th>المدة (شهور)</th><th>المبلغ</th><th>طريقة الدفع</th><th>البنك</th><th>ملاحظات</th>
             </tr></thead>
             <tbody id="statsRenterTableBody"></tbody>
           </table>
@@ -225,7 +229,7 @@
           <div style="overflow-x:auto;">
           <table>
             <thead><tr>
-              <th>المستأجر</th><th>تاريخ البداية</th><th>تاريخ الانتهاء</th><th>المدة (شهور)</th><th>المبلغ</th><th>طريقة الدفع</th><th>البنك</th><th>ملاحظات</th>
+              <th>المستأجر</th><th>تاريخ البداية</th><th>تاريخ السداد</th><th>تاريخ الانتهاء</th><th>المدة (شهور)</th><th>المبلغ</th><th>طريقة الدفع</th><th>البنك</th><th>ملاحظات</th>
             </tr></thead>
             <tbody id="statsFlatTableBody"></tbody>
           </table>
@@ -235,7 +239,46 @@
       </div>
     </section>
 
+    <!-- ==================== الأرشيف ==================== -->
+    <section class="section" id="section-archive">
+      <div class="page-head">
+        <div>
+          <h1>الأرشيف</h1>
+          <p>المستأجرون القدامى وسجلاتهم — يمكن استعادتهم في أي وقت</p>
+        </div>
+      </div>
+      <div class="table-card">
+        <div style="overflow-x:auto;">
+        <table>
+          <thead><tr>
+            <th>الاسم</th><th>رقم الهوية</th><th>الجنسية</th><th>تاريخ الأرشفة</th><th>عدد السجلات المؤرشفة</th><th></th>
+          </tr></thead>
+          <tbody id="archiveTableBody"></tbody>
+        </table>
+        </div>
+        <div id="archiveEmpty" class="table-empty" style="display:none;">لا يوجد مستأجرون مؤرشفون حالياً</div>
+      </div>
+    </section>
+
   </main>
+</div>
+
+<!-- ==================== نافذة تفاصيل سجلات الأرشيف ==================== -->
+<div class="modal-overlay" id="archiveDetailModal">
+  <div class="modal" style="max-width:760px;">
+    <h3 id="archiveDetailTitle">سجلات المستأجر</h3>
+    <div style="overflow-x:auto;">
+    <table>
+      <thead><tr>
+        <th>رقم الشقة</th><th>تاريخ البداية</th><th>تاريخ السداد</th><th>تاريخ الانتهاء</th><th>المدة</th><th>المبلغ</th><th>طريقة الدفع</th><th>البنك</th><th>ملاحظات</th>
+      </tr></thead>
+      <tbody id="archiveDetailTableBody"></tbody>
+    </table>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-primary" style="width:100%;" data-close-modal="archiveDetailModal">إغلاق</button>
+    </div>
+  </div>
 </div>
 
 <!-- ==================== نافذة الشقة ==================== -->
@@ -338,7 +381,7 @@
       </div>
       <div class="form-grid">
         <div class="field">
-          <label>تاريخ الدفع</label>
+          <label>تاريخ السداد</label>
           <input type="date" id="rentDatePay">
         </div>
         <div class="field">
@@ -402,7 +445,7 @@
 <!-- ==================== نافذة تأكيد الحذف ==================== -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal" style="max-width:400px;">
-    <h3>تأكيد الحذف</h3>
+    <h3 id="confirmModalTitle">تأكيد الحذف</h3>
     <p id="confirmModalText" style="font-size:14.5px; line-height:1.8; color:var(--text); margin:0 0 20px;"></p>
     <div class="modal-actions">
       <button type="button" class="btn btn-ghost" id="confirmCancelBtn">إلغاء</button>
@@ -413,6 +456,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script type="module" src="js/app.js?v=13"></script>
+<script type="module" src="js/app.js?v=14"></script>
 </body>
 </html>
