@@ -579,12 +579,20 @@ tbody tr:hover { background: var(--sand); }
   .floor-row { flex-direction: column; align-items: stretch; }
   .floor-label { width: auto; text-align: right; }
   .table-scroll { max-height: calc(100vh - 190px); }
-  .table-rents th:last-child, .table-rents td:last-child {
+  .table-rents thead th:last-child {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 6;
+    background: var(--sand-deep);
+    box-shadow: 6px 0 8px -6px rgba(0,0,0,0.15);
+  }
+  .table-rents tbody td:last-child {
     position: sticky;
     left: 0;
     z-index: 5;
+    background: var(--surface);
     box-shadow: 6px 0 8px -6px rgba(0,0,0,0.15);
   }
-  .table-rents tbody td:last-child { background: var(--surface); }
   .table-rents tbody tr:hover td:last-child { background: var(--sand); }
 }
